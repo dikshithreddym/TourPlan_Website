@@ -250,11 +250,50 @@ function resetCurrentUser() {
 
 /* ===== Screen 3: Emergency + Table + Gate ===== */
 async function renderEmergency() {
-  let responses = {};
-  try { responses = await readResponsesRemote(); }
-  catch { responses = readResponsesLocal(); }
-  renderEmergencyWith(responses);
+  const { db, fs } = window.FB;
+  const snap = await fs.getDocs(fs.collection(db, "responses"));
+
+  const responses = {};
+  snap.forEach(doc => {
+    const d = doc.data() || {};
+    responses[doc.id] = {
+      status: d.status || "Pending",
+      ts: d.ts && d.ts.toDate ? d.ts.toDate() : null, // normalize
+    };
+  });
+
+  const tbody = document.querySelector("#responses-table tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  PEOPLE.forEach((p, i) => {
+    const status = responses[p.code]?.status || "Pending";
+    const whenDate = responses[p.code]?.ts;
+    const when = whenDate ? whenDate.toLocaleString() : "—";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${i + 1}</td><td>${p.name}</td><td>${status}</td><td>${when}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const notReady = PEOPLE.filter(p => (responses[p.code]?.status || "Pending") !== "Interested");
+  const banner = document.querySelector("#gate-banner");
+  if (banner) {
+    if (notReady.length) {
+      banner.classList.remove("hidden");
+      banner.textContent = `⛔ Roadmap locked. Not Interested / Missing: ${notReady.map(n => n.name).join(", ")}`;
+    } else {
+      banner.classList.add("hidden");
+      banner.textContent = "";
+    }
+  }
+
+  document.getElementById("btn-emergency-back")?.addEventListener("click", () => show("screen-response"));
+  document.getElementById("btn-emergency-continue")?.addEventListener("click", () => {
+    if (notReady.length) { alert("Everyone must be 'Interested' to open the Roadmap."); return; }
+    show("day-1");
+  });
 }
+
 
 function renderEmergencyWith(responses) {
   const tbody = $("#responses-table tbody");
