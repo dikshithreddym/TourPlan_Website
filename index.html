@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>California Trip • Sept 15–20</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main id="app">
+
+    <!-- ============ SCREEN 1: ACKNOWLEDGMENTS ============ -->
+    <section id="screen-start" class="screen active">
+      <div class="card lg">
+        <div class="pill">CALIFORNIA TRIP PLANNER</div>
+        <h1 class="title">CALIFORNIA</h1>
+        <h2 class="subtitle">SEP 15 MON – SEP 20 SAT</h2>
+
+        <div class="card">
+          <h3 class="loud">
+            “IF YOU ARE READY TO THROW RUNNING COMMENTS DURING TRIP, RIGHTNOW YOU NEED TO TAKE THE
+            INITIATIVE TO MAKE THE PLAN FOR THE TRIP.”
+          </h3>
+
+          <label class="check"><input type="checkbox" class="ack" />
+            No one is forcing me — I am joining this trip because I am truly interested.</label>
+          <label class="check"><input type="checkbox" class="ack" />
+            I understand that the pictures online may not look exactly the same in real life, and I am okay with that.</label>
+          <label class="check"><input type="checkbox" class="ack" />
+            I understand that the timings may not be exact and could vary a little — and I am okay with that.</label>
+          <label class="check"><input type="checkbox" class="ack" />
+            I accept that because of weather conditions, the plans may change.</label>
+
+          <div class="note">
+            <strong>Note from the Organizer:</strong>
+            <p>We are a group of 17 people. Based on my knowledge, research from the internet, advice from others,
+            and careful consideration of budget and time management, I have invested a lot of effort into preparing
+            this trip plan.</p>
+          </div>
+
+          <button id="btn-start-continue" class="btn primary" disabled>Continue</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 2: RESPONSE (LOGIN + CHOICE) ============ -->
+    <section id="screen-response" class="screen">
+      <div class="card lg">
+        <h2>Tap Interested or Not Interested</h2>
+        <p class="muted">Enter the <strong>first 5 letters of your first name</strong> to unlock your card.</p>
+
+        <div class="login-row">
+          <input id="code-input" class="input" maxlength="5" placeholder="e.g., NIKHI" />
+          <button id="btn-validate" class="btn">Validate</button>
+          <span id="code-feedback" class="feedback"></span>
+        </div>
+
+        <div id="people-grid" class="grid"></div>
+
+        <div class="row">
+          <button id="btn-response-next" class="btn primary">Go to Emergency Contact</button>
+          <button id="btn-reset" class="btn ghost">Reset Me</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 3: EMERGENCY CONTACT + STATUS TABLE ============ -->
+    <section id="screen-emergency" class="screen">
+      <div class="card lg">
+        <h2>Trip Contact</h2>
+        <div class="contact">
+          <img src="https://i.pravatar.cc/80?img=67" alt="Prudhvi avatar" />
+          <div>
+            <div class="contact-name">PRUDHVI</div>
+            <div class="contact-role">Trip CEO</div>
+            <div class="contact-line">Phone: <a href="tel:9135489441">9135489441</a></div>
+            <div class="contact-line">Email: <a href="mailto:TRIPCEO@GMAIL.COM">TRIPCEO@GMAIL.COM</a></div>
+          </div>
+        </div>
+
+        <div id="gate-banner" class="banner hidden"></div>
+
+        <h3 class="mt">Responses</h3>
+        <div class="table-wrap">
+          <table id="responses-table">
+            <thead>
+              <tr><th>#</th><th>Name</th><th>Status</th><th>When</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="row mt">
+          <button class="btn" id="btn-emergency-back">Back</button>
+          <button class="btn primary" id="btn-emergency-continue">Continue to Roadmap</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREENS 4–8: ROADMAP (DAYS) ============ -->
+    <section id="day-1" class="screen">
+      <div class="card lg">
+        <h2>🌄 LAKE TAHOE – DAY 1</h2>
+        <div class="card">
+          <h3>🏡 Airbnb</h3>
+          <p>Sept 15 (Monday check-in) → Sept 16 (Tuesday checkout)</p>
+          <p><strong>Address:</strong> 1 Lake Parkway, South Lake Tahoe, CA 96150, USA</p>
+          <p><strong>Cost:</strong> $656</p>
+          <p><strong>Distance:</strong> ~8 hrs from airport · ~35 min to Inspiration Point</p>
+          <h3>🕰️ Itinerary</h3>
+          <ul class="bullets">
+            <li>08:00 – Inspiration Point (~30 min)</li>
+            <li>08:30 – Vista Point (~20–30 min)</li>
+            <li>09:00 – CA-89 → CA-28 to Incline Village (~55–60 min)</li>
+            <li>10:00 – Monkey Rock Trail (~2.5 mi, 1–1.5 hrs)</li>
+            <li>12:00 – Lunch in Incline Village</li>
+            <li>13:15 – Sand Harbor Beach (2–3 hrs)</li>
+            <li>16:00–17:00 – Return / relax</li>
+          </ul>
+          <div class="row">
+            <button data-goto="screen-emergency" class="btn">Previous Day</button>
+            <button data-goto="day-2" class="btn primary">Next Day</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="day-2" class="screen">
+      <div class="card lg">
+        <h2>🧭 SAN FRANCISCO – DAY 2</h2>
+        <div class="card">
+          <h3>🏡 Airbnb</h3>
+          <p>Sept 16 (Tuesday night check-in) → Sept 18 (Thursday checkout)</p>
+          <p><strong>Location:</strong> South San Francisco • <strong>Cost:</strong> $1360 (2 nights)</p>
+          <h3>🕰️ Itinerary</h3>
+          <ul class="bullets">
+            <li>09:00–11:00 – Golden Gate Bridge (walk, photos)</li>
+            <li>11:30–12:30 – Sister Cities Plaza & Civic Center stroll</li>
+            <li>13:00–17:00 – Fisherman’s Wharf & Pier 39</li>
+          </ul>
+          <div class="row">
+            <button data-goto="day-1" class="btn">Previous Day</button>
+            <button data-goto="day-3" class="btn primary">Next Day</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="day-3" class="screen">
+      <div class="card lg">
+        <h2>🌊 COASTAL DRIVE – DAY 3</h2>
+        <div class="card">
+          <h3>Distances & Drive Times</h3>
+          <p>SF → Half Moon Bay: ~30 mi / 45 min • HMB → Santa Cruz: ~50 mi / 1 hr • Santa Cruz → Big Sur: ~70 mi / 2 hrs</p>
+          <h3>🕰️ Itinerary</h3>
+          <ul class="bullets">
+            <li>08:00–09:00 – Drive SF → Half Moon Bay</li>
+            <li>09:00–11:00 – Explore HMB</li>
+            <li>11:00–12:00 – Drive to Santa Cruz</li>
+            <li>12:00–14:00 – Lunch & explore Santa Cruz</li>
+            <li>14:00–16:00 – Hwy 1 → Big Sur (photo stops)</li>
+            <li>16:00–18:00 – Bixby Bridge / Pfeiffer Beach / McWay Falls</li>
+          </ul>
+          <div class="row">
+            <button data-goto="day-2" class="btn">Previous Day</button>
+            <button data-goto="day-4" class="btn primary">Next Day</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="day-4" class="screen">
+      <div class="card lg">
+        <h2>🌴 LOS ANGELES – DAY 4</h2>
+        <div class="card">
+          <h3>🏡 Airbnb</h3>
+          <p>Sept 18 (Thursday check-in) → Sept 19 (Friday checkout)</p>
+          <p><strong>Location:</strong> Culver City • <strong>Cost:</strong> $768 (1 night)</p>
+          <h3>🕰️ Itinerary</h3>
+          <ul class="bullets">
+            <li>Morning – Santa Monica Pier</li>
+            <li>Afternoon – Manhattan Beach</li>
+            <li>Evening – Long Beach</li>
+          </ul>
+          <div class="row">
+            <button data-goto="day-3" class="btn">Previous Day</button>
+            <button data-goto="day-5" class="btn primary">Next Day</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="day-5" class="screen">
+      <div class="card lg">
+        <h2>🎰 LAS VEGAS – DAY 5</h2>
+        <div class="card">
+          <h3>🕰️ Itinerary</h3>
+          <ul class="bullets">
+            <li>Vegas Strip Walk</li>
+            <li>Bellagio Fountain Show</li>
+            <li>Bellagio Conservatory</li>
+            <li>Fremont Street Experience</li>
+            <li>Eiffel Tower Restaurant (option)</li>
+            <li>Seven Magic Mountains</li>
+          </ul>
+          <div class="row">
+            <button data-goto="day-4" class="btn">Previous Day</button>
+            <button data-goto="screen-rental" class="btn primary">View Car Rental Plan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN 9: CAR RENTAL ============ -->
+    <section id="screen-rental" class="screen">
+      <div class="card lg">
+        <h2>🚗 CAR RENTAL PLAN</h2>
+        <div class="card">
+          <p><strong>📍 Pickup & Drop-off:</strong> LAX (Los Angeles International Airport)</p>
+          <p><strong>📅 Dates:</strong> Sept 15 → Sept 20</p>
+          <h3>🔷 Vehicle Options</h3>
+          <ul class="bullets">
+            <li><strong>RAV4 or Similar (5-Seater)</strong> – Car: $312 • Insurance: $201 • <strong>Total:</strong> $513</li>
+            <li><strong>RAV4 or Similar (5-Seater)</strong> – Car: $312 • Insurance: $201 • <strong>Total:</strong> $513</li>
+            <li><strong>Jeep Grand Cherokee L or Similar (7-Seater)</strong> – Car: $432 • Insurance: $236 • <strong>Total:</strong> $668</li>
+          </ul>
+          <p class="muted"><strong>Grand Total:</strong> $1694 – $1770 (final amount may vary slightly)</p>
+          <div class="row">
+            <button data-goto="day-5" class="btn">Previous Day</button>
+            <button data-goto="screen-start" class="btn">Back to Start</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+  // TODO: paste your real config here
+  const firebaseConfig = {
+  apiKey: "AIzaSyBC-YP4H76myyEizwc8OKkQE3684xqrlrc",
+  authDomain: "tourwebsiteseptember.firebaseapp.com",
+  projectId: "tourwebsiteseptember",
+  storageBucket: "tourwebsiteseptember.firebasestorage.app",
+  messagingSenderId: "760939924547",
+  appId: "1:760939924547:web:cf4431866a92da516b98f6",
+  measurementId: "G-WGGVRQFJ5B"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  const auth = getAuth(app);
+
+  // Ensure we’re authenticated before your app tries to write
+  await signInAnonymously(auth);
+
+  // Expose to script.js (the snippets I gave earlier use window.FB.*)
+  window.FB = {
+    app, db, auth,
+    fs: { collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp }
+  };
+</script>
+
+  <script src="script.js"></script>
+</body>
+</html>
