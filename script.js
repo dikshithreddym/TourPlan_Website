@@ -138,8 +138,16 @@ async function buildPeopleGrid() {
     bNo.className = "btn";
     bNo.textContent = "Not Interested";
 
-    bYes.addEventListener("click", () => saveResponse(person.code, "Interested", badge));
-    bNo.addEventListener("click", () => saveResponse(person.code, "Not Interested", badge));
+    bYes.addEventListener("click", () => {
+      saveResponse(person.code, "Interested", badge);
+      show("screen-emergency");   // 👈 immediately go to the Responses page
+    });
+
+    bNo.addEventListener("click", () => {
+      saveResponse(person.code, "Not Interested", badge);
+      // you could also route somewhere here if you want
+    });
+
 
     group.appendChild(bYes);
     group.appendChild(bNo);
