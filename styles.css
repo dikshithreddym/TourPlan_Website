@@ -7,6 +7,18 @@
   --primaryShadow: rgba(255,103,93,.35);
   --ring: rgba(0,0,0,.08);
 }
+
+:root{
+  --bg: #0f0f10;
+  --panel: #fff;
+  --text: #0f0f10;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-2: #06b40f;
+  --danger: #ef4444;
+  --ok: #16a34a;
+}
+
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
   font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
@@ -66,20 +78,31 @@ tbody tr:last-child td{border-bottom:0}
 .bullets li{margin:6px 0}
 .muted{color:#666}
 
-/* Budget table form controls */
-#budget-table select, #budget-table input[type="number"]{
+/* ==== Budget table ==== */
+.table-wrap{ overflow-x:auto; }
+#budget-table{ width:100%; border-collapse:separate; border-spacing:0 8px; }
+#budget-table th, #budget-table td{ padding:10px 12px; background:#fff; }
+#budget-table th{ text-align:left; color:#111827; font-weight:700; }
+
+/* Inputs inside budget table */
+#budget-table select,
+#budget-table input[type="number"],
+#budget-table input[type="text"],
+#budget-table input[type="file"]{
   width: 100%;
   padding: 8px 10px;
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fff;
 }
+
+#budget-table .btn{ padding:8px 12px; }
 #btn-add-budget-row{ min-width: 140px; }
 
-
-
-/* Budget row save helpers */
+/* Save animation */
 #budget-table tr.saved { animation: flashSaved 0.8s ease; }
 @keyframes flashSaved { from { background:#e8ffe8; } to { background:transparent; } }
-#budget-table input[type="text"]{ width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:10px; }
-#budget-table input[type="file"]{ width:100%; }
+
+/* Feedback colors */
+.feedback.ok{ color: var(--ok); margin-left:8px; }
+.feedback.err{ color: var(--danger); margin-left:8px; }
