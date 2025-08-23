@@ -32,7 +32,15 @@ const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Wait until Firebase is ready before touching window.FB
+    // Try anonymous auth (if available)
+  try {
+    const { auth, fa } = window.FB || {};
+    if (auth && fa && !fa.currentUser && fa.signInAnonymously) {
+      await fa.signInAnonymously(auth);
+    }
+  } catch (e) { console.log('Anonymous auth not configured:', e?.message || e); }
+
+// Wait until Firebase is ready before touching window.FB
   if (window.FB?.ready) {
     try { await window.FB.ready; } catch (e) { console.error(e); }
   }
@@ -58,7 +66,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       if ($("#screen-emergency")?.classList.contains("active")) {
         renderEmergencyWith(responses);
       }
-    });
+          },
+      (err) => {
+        console.warn("Payments listener disabled:", err?.code || err?.message || err);
+      }
+    );
   }
 });
 
@@ -372,14 +384,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Firestore realtime updates for payments
   const { db, fs } = window.FB || {};
   if (db) {
-    fs.onSnapshot(fs.collection(db, "payments"), (snap) => {
+    fs.onSnapshot(
+      fs.collection(db, "payments"),
+      (snap) => {
       const payments = {};
       snap.forEach(doc => {
         const d = doc.data() || {};
         payments[doc.id] = { status: d.status || "Unpaid", ts: d.ts ? (d.ts.toDate ? d.ts.toDate().toISOString() : d.ts) : null };
       });
       updatePaymentsButtons(payments);
-    });
+          },
+      (err) => {
+        console.warn("Payments listener disabled:", err?.code || err?.message || err);
+      }
+    );
   }
 });
 
