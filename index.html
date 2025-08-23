@@ -240,30 +240,34 @@
   import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-  // TODO: paste your real config here
   const firebaseConfig = {
-  apiKey: "AIzaSyBC-YP4H76myyEizwc8OKkQE3684xqrlrc",
-  authDomain: "tourwebsiteseptember.firebaseapp.com",
-  projectId: "tourwebsiteseptember",
-  storageBucket: "tourwebsiteseptember.firebasestorage.app",
-  messagingSenderId: "760939924547",
-  appId: "1:760939924547:web:cf4431866a92da516b98f6",
-  measurementId: "G-WGGVRQFJ5B"
-};
+    apiKey: "AIzaSyBC-YP4H76myyEizwc8OKkQE3684xqrlrc",
+    authDomain: "tourwebsiteseptember.firebaseapp.com",
+    projectId: "tourwebsiteseptember",
+    storageBucket: "tourwebsiteseptember.firebasestorage.app",
+    messagingSenderId: "760939924547",
+    appId: "1:760939924547:web:cf4431866a92da516b98f6",
+    measurementId: "G-WGGVRQFJ5B"
+  };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
   const auth = getAuth(app);
 
-  // Ensure we’re authenticated before your app tries to write
-  await signInAnonymously(auth);
-
-  // Expose to script.js (the snippets I gave earlier use window.FB.*)
+  // 1) Expose Firebase immediately for script.js
   window.FB = {
     app, db, auth,
     fs: { collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp }
   };
+
+  // 2) Start anonymous sign-in (do NOT await)
+  signInAnonymously(auth).catch(console.error);
+
+  // (optional) log when auth is ready
+  onAuthStateChanged(auth, (u) => console.log("Auth ready:", !!u));
 </script>
+
+<script src="script.js?v=1"></script>
 
   <script src="script.js"></script>
 </body>

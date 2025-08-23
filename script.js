@@ -32,6 +32,11 @@ const $  = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Wait until Firebase is ready before touching window.FB
+  if (window.FB?.ready) {
+    try { await window.FB.ready; } catch (e) { console.error(e); }
+  }
+
   setupStartScreen();
   await buildPeopleGrid();     // now async because it fetches remote data
   wireNavigation();
