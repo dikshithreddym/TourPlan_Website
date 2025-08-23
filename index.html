@@ -265,10 +265,13 @@
 
   // (optional) log when auth is ready
   onAuthStateChanged(auth, (u) => console.log("Auth ready:", !!u));
+
+  window.FB.ready = new Promise((resolve) => {
+    onAuthStateChanged(auth, (u) => { if (u) resolve(); });
+  });
 </script>
 
 <script src="script.js?v=1"></script>
 
-  <script src="script.js"></script>
 </body>
 </html>
