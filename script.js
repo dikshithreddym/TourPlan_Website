@@ -583,13 +583,82 @@ function buildBudgetTable() {
   recalcBudgetRemaining();
 }
 
+
+// Map display name to 5-letter code using PEOPLE
+function codeForName(name) {
+  const p = PEOPLE.find(x => (x.name || "").toLowerCase().includes((name||"").toLowerCase()));
+  // Fallback quick map for the 3 names we use
+  if (!p) {
+    if ((name||"").toLowerCase().startsWith("tejas")) return "TEJAS";
+    if ((name||"").toLowerCase().startsWith("keer")) return "KEERT";
+    if ((name||"").toLowerCase().startsWith("srini")) return "SRINI";
+  }
+  return p?.code || null;
+}
+
+async function saveBudgetRow(tr) {
+  const { db, fs, storage, st } = window.FB || {};
+  if (!db || !storage) { alert("Firebase not ready."); return; }
+
+  const selReceipt = tr.querySelector("select[data-field='receipt']");
+  const selPaid    = tr.querySelector("select[data-field='paidBy']");
+  const amt        = tr.querySelector('input[data-field="amount"]');
+  const textInput  = tr.querySelector('input[data-field="receiptText"]');
+  const fileInput  = tr.querySelector('input[data-field="receiptFile"]');
+
+  const receiptType = selReceipt?.value || "";
+  const paidByName  = selPaid?.value || "";
+  const amountNum   = amt?.value ? Number(amt.value) : NaN;
+
+  if (!paidByName) return alert("Select who paid.");
+  if (!receiptType) return alert("Choose a receipt option.");
+  if (!Number.isFinite(amountNum) || amountNum < 0) return alert("Enter a valid amount.");
+
+  let fileUrl = "";
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    // allow images or pdf
+    const ok = file.type.startsWith("image/") || file.type === "application/pdf";
+    if (!ok) return alert("Only images or PDF allowed.");
+    const code = codeForName(paidByName) || "GEN";
+    const fn = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+    const path = `budgets/${code}/${fn}`;
+    const r = st.ref(storage, path);
+    await st.uploadBytes(r, file);
+    fileUrl = await st.getDownloadURL(r);
+  }
+
+  const data = {
+    receiptType,
+    receiptText: receiptType === "Text" ? (textInput?.value || "") : "",
+    paidBy: paidByName,
+    amount: amountNum,
+    fileUrl,
+    ts: fs.serverTimestamp()
+  };
+
+  // Write to budgets/{code}/rows/{auto}
+  const code = codeForName(paidByName);
+  if (!code) return alert("Unknown person code for " + paidByName);
+  const col = fs.collection(db, `budgets/${code}/rows`);
+  // Using setDoc with a random doc id via collection().doc() is not available in v9 tree-shake;
+  // Use add via setDoc on doc(collection) with auto id:
+  const { doc, setDoc } = fs;
+  const newDocRef = fs.doc(col); // create an unbound ref to get random id
+  await fs.setDoc(newDocRef, data);
+  // Give a tiny visual confirmation
+  tr.classList.add("saved");
+  setTimeout(() => tr.classList.remove("saved"), 800);
+}
+
+
 function makeBudgetRow(data, idx) {
   const tr = document.createElement("tr");
 
   // Receipt dropdown
   const tdReceipt = document.createElement("td");
-  const selReceipt = document.createElement("select");
-  ["", "Camera", "Select From Device"].forEach(opt => {
+  const selReceipt = document.createElement("select"); selReceipt.setAttribute("data-field","receipt");
+  ["", "Text", "Camera", "Select From Device"].forEach(opt => {
     const o = document.createElement("option");
     o.value = opt;
     o.textContent = opt || "Choose…";
@@ -601,7 +670,7 @@ function makeBudgetRow(data, idx) {
 
   // Paid By dropdown
   const tdPaidBy = document.createElement("td");
-  const selPaid = document.createElement("select");
+  const selPaid = document.createElement("select"); selPaid.setAttribute("data-field","paidBy");
   ["", "Tejaswi", "Keerthi", "Srinika"].forEach(opt => {
     const o = document.createElement("option");
     o.value = opt;
@@ -615,7 +684,7 @@ function makeBudgetRow(data, idx) {
   // Amount number
   const tdAmt = document.createElement("td");
   const inputAmt = document.createElement("input");
-  inputAmt.type = "number";
+  inputAmt.type = "number"; inputAmt.setAttribute("data-field","amount");
   inputAmt.min = "0";
   inputAmt.step = "1";
   inputAmt.value = data.amount ?? "";
@@ -626,6 +695,68 @@ function makeBudgetRow(data, idx) {
   tr.appendChild(tdReceipt);
   tr.appendChild(tdPaidBy);
   tr.appendChild(tdAmt);
+
+  // Dynamic inputs for receipt: text or file
+  const tdExtra = document.createElement("td");
+  tdExtra.colSpan = 3;
+  tdExtra.style.paddingTop = "8px";
+
+  const inputText = document.createElement("input");
+  inputText.type = "text";
+  inputText.placeholder = "Describe receipt (only for Text option)";
+  inputText.style.display = "none";
+  inputText.setAttribute("data-field","receiptText");
+  inputText.addEventListener("input", () => { saveBudgetRows(); });
+
+  const inputFile = document.createElement("input");
+  inputFile.type = "file";
+  inputFile.accept = "image/*,application/pdf";
+  inputFile.style.display = "none";
+  inputFile.setAttribute("data-field","receiptFile");
+  inputFile.addEventListener("change", () => { /* no-op */ });
+
+  // Toggle controls based on receipt type
+  function updateReceiptControls() {
+    const v = selReceipt.value;
+    inputText.style.display = (v === "Text") ? "" : "none";
+    inputFile.style.display = (v === "Camera" || v === "Select From Device") ? "" : "none";
+    // For "Camera", hint camera
+    if (v === "Camera") {
+      inputFile.accept = "image/*";
+      inputFile.setAttribute("capture", "environment");
+    } else {
+      inputFile.accept = "image/*,application/pdf";
+      inputFile.removeAttribute("capture");
+    }
+  }
+  selReceipt.addEventListener("change", () => { updateReceiptControls(); saveBudgetRows(); });
+
+  tdExtra.appendChild(inputText);
+  tdExtra.appendChild(inputFile);
+
+  // Row Save button
+  const tdActions = document.createElement("td");
+  tdActions.colSpan = 3;
+  const btnSave = document.createElement("button");
+  btnSave.className = "btn";
+  btnSave.textContent = "Save Row";
+  btnSave.addEventListener("click", async () => {
+    if (!isBudgetAdmin()) return alert("Enter the password to edit.");
+    try { await saveBudgetRow(tr); alert("Saved!"); }
+    catch (e) { console.error(e); alert("Save failed: " + (e?.message || e)); }
+  });
+  tdActions.appendChild(btnSave);
+
+  const trExtra = document.createElement("tr");
+  const trActions = document.createElement("tr");
+  trExtra.appendChild(tdExtra);
+  trActions.appendChild(tdActions);
+
+  // insert helpers row after main row
+  tr.parentElement && tr.parentElement.appendChild(trExtra);
+  tr.parentElement && tr.parentElement.appendChild(trActions);
+
+  updateReceiptControls();
 
   return tr;
 }

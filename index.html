@@ -313,6 +313,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
   import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import { getStorage, ref as stRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBC-YP4H76myyEizwc8OKkQE3684xqrlrc",
@@ -327,11 +328,13 @@
   const app  = initializeApp(firebaseConfig);
   const db   = getFirestore(app);
   const auth = getAuth(app);
+  const storage = getStorage(app);
 
   // 1) Expose Firebase immediately for script.js
   window.FB = {
-    app, db, auth,
-    fs: { collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp }
+    app, db, auth, storage,
+    fs: { collection, doc, setDoc, getDocs, onSnapshot, serverTimestamp },
+    st: { ref: stRef, uploadBytes, getDownloadURL }
   };
 
   // 2) Start anonymous sign-in (do NOT await)
