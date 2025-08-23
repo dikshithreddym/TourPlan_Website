@@ -229,14 +229,8 @@ async function saveResponse(code, status, badgeEl) {
       badgeEl.textContent = status;
     }
   } catch (e) {
-    console.error("Firestore write failed, falling back to localStorage", e);
-    const responses = readResponsesLocal();
-    responses[code] = { status, ts: new Date().toISOString() };
-    localStorage.setItem(LS_RESPONSES, JSON.stringify(responses));
-    if (badgeEl) {
-      badgeEl.className = "badge " + (status === "Interested" ? "ok" : "no");
-      badgeEl.textContent = status;
-    }
+    console.error("Firestore write failed:", e);
+    alert("Couldn’t save to the cloud. Check auth/rules/network and retry.");
   }
 }
 
