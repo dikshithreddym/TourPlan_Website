@@ -65,3 +65,14 @@ tbody tr:last-child td{border-bottom:0}
 .bullets{margin:8px 0 0 0}
 .bullets li{margin:6px 0}
 .muted{color:#666}
+
+/* Budget table form controls */
+#budget-table select, #budget-table input[type="number"]{
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+}
+#btn-add-budget-row{ min-width: 140px; }
+

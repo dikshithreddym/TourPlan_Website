@@ -259,6 +259,48 @@
 
         <div class="row mt">
           <button class="btn" data-goto="screen-rental">Back to Car Rental</button>
+          <button class="btn primary" data-goto="screen-budget">Continue to Total Budget</button>
+          <button class="btn" data-goto="screen-start">Back to Start</button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============ SCREEN 11: TOTAL BUDGET ============ -->
+    <section id="screen-budget" class="screen">
+      <div class="card lg">
+        <h1 style="text-align:center">Total Budget</h1>
+        <h3 style="text-align:center">Total allocated Budget is <b>$8500</b></h3>
+        <h4 style="text-align:center">500 x 17 = 8500</h4>
+        <h4 style="text-align:center">Budget Management: <u><span style="color:#06b40f">Vaishnavi Reddy</span></u></h4>
+
+        <div class="note" style="text-align:center">
+          <strong>Remaining Amount:</strong> <span id="budget-remaining" style="font-weight:800">$8500</span>
+        </div>
+
+        <div class="login-row">
+          <input id="budget-code" class="input" type="password" placeholder="Enter Password to edit" />
+          <button id="btn-budget-unlock" class="btn">Unlock Editing</button>
+          <span id="budget-feedback" class="feedback"></span>
+        </div>
+
+        <div class="table-wrap mt">
+          <table id="budget-table">
+            <thead>
+              <tr><th>Receipt</th><th>Paid By</th><th>Amount Spent</th></tr>
+            </thead>
+            <tbody>
+              <!-- 5 starter rows will be created by JS if not present -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="row mt">
+          <button class="btn" id="btn-add-budget-row">+ Add Row</button>
+        </div>
+
+        <div class="row mt">
+          <button class="btn" data-goto="screen-prebooking">Back to Pre Booking</button>
           <button class="btn" data-goto="screen-start">Back to Start</button>
         </div>
       </div>

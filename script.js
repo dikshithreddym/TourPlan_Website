@@ -513,3 +513,151 @@ async function readPaymentsRemote() {
   });
   return out;
 }
+
+/* ===== Total Budget Table (client-side) ===== */
+const LS_BUDGET_ROWS = "trip_budget_rows_v1";
+const LS_BUDGET_ADMIN = "budget_admin_unlocked";
+const BUDGET_UNLOCK_CODE = PAYMENTS_UNLOCK_CODE; // same code: FallTour@2025
+const BUDGET_TOTAL = 8500;
+
+document.addEventListener("DOMContentLoaded", () => {
+  buildBudgetTable?.();
+});
+
+function isBudgetAdmin() {
+  return localStorage.getItem(LS_BUDGET_ADMIN) === "1";
+}
+
+function lockBudgetEditing(lock = true) {
+  document.querySelectorAll('#budget-table select, #budget-table input[type="number"]').forEach(el => {
+    el.disabled = !!lock;
+  });
+  const addBtn = document.getElementById("btn-add-budget-row");
+  if (addBtn) addBtn.disabled = !!lock;
+}
+
+function buildBudgetTable() {
+  const table = document.getElementById("budget-table");
+  if (!table) return;
+
+  const tbody = table.querySelector("tbody");
+  tbody.innerHTML = "";
+
+  // Load saved rows or create 5 starter rows
+  const rows = loadBudgetRows() || Array.from({ length: 5 }).map(() => ({ receipt: "", paidBy: "", amount: "" }));
+
+  rows.forEach((row, idx) => {
+    tbody.appendChild(makeBudgetRow(row, idx));
+  });
+
+  // Wire unlock
+  const input = document.getElementById("budget-code");
+  const unlockBtn = document.getElementById("btn-budget-unlock");
+  const feedback = document.getElementById("budget-feedback");
+  if (unlockBtn) {
+    unlockBtn.addEventListener("click", () => {
+      const code = (input?.value || "").trim();
+      if (code === BUDGET_UNLOCK_CODE) {
+        localStorage.setItem(LS_BUDGET_ADMIN, "1");
+        lockBudgetEditing(false);
+        if (feedback) { feedback.textContent = "Editing unlocked."; feedback.className = "feedback ok"; }
+      } else {
+        localStorage.removeItem(LS_BUDGET_ADMIN);
+        lockBudgetEditing(true);
+        if (feedback) { feedback.textContent = "Incorrect code."; feedback.className = "feedback err"; }
+      }
+    });
+  }
+
+  // Add row button
+  document.getElementById("btn-add-budget-row")?.addEventListener("click", () => {
+    const newRow = { receipt: "", paidBy: "", amount: "" };
+    const tr = makeBudgetRow(newRow, tbody.children.length);
+    tbody.appendChild(tr);
+    saveBudgetRows();
+    recalcBudgetRemaining();
+  });
+
+  // Apply lock state then recalc
+  lockBudgetEditing(!isBudgetAdmin());
+  recalcBudgetRemaining();
+}
+
+function makeBudgetRow(data, idx) {
+  const tr = document.createElement("tr");
+
+  // Receipt dropdown
+  const tdReceipt = document.createElement("td");
+  const selReceipt = document.createElement("select");
+  ["", "Camera", "Select From Device"].forEach(opt => {
+    const o = document.createElement("option");
+    o.value = opt;
+    o.textContent = opt || "Choose…";
+    if (data.receipt === opt) o.selected = true;
+    selReceipt.appendChild(o);
+  });
+  selReceipt.addEventListener("change", () => { saveBudgetRows(); });
+  tdReceipt.appendChild(selReceipt);
+
+  // Paid By dropdown
+  const tdPaidBy = document.createElement("td");
+  const selPaid = document.createElement("select");
+  ["", "Tejaswi", "Keerthi", "Srinika"].forEach(opt => {
+    const o = document.createElement("option");
+    o.value = opt;
+    o.textContent = opt || "Choose…";
+    if (data.paidBy === opt) o.selected = true;
+    selPaid.appendChild(o);
+  });
+  selPaid.addEventListener("change", () => { saveBudgetRows(); });
+  tdPaidBy.appendChild(selPaid);
+
+  // Amount number
+  const tdAmt = document.createElement("td");
+  const inputAmt = document.createElement("input");
+  inputAmt.type = "number";
+  inputAmt.min = "0";
+  inputAmt.step = "1";
+  inputAmt.value = data.amount ?? "";
+  inputAmt.placeholder = "0";
+  inputAmt.addEventListener("input", () => { saveBudgetRows(); recalcBudgetRemaining(); });
+  tdAmt.appendChild(inputAmt);
+
+  tr.appendChild(tdReceipt);
+  tr.appendChild(tdPaidBy);
+  tr.appendChild(tdAmt);
+
+  return tr;
+}
+
+function loadBudgetRows() {
+  try { return JSON.parse(localStorage.getItem(LS_BUDGET_ROWS) || "null"); }
+  catch { return null; }
+}
+
+function saveBudgetRows() {
+  const rows = [];
+  document.querySelectorAll("#budget-table tbody tr").forEach(tr => {
+    const selReceipt = tr.querySelector("select:nth-of-type(1)");
+    const selPaid = tr.querySelector("select:nth-of-type(2)");
+    const amt = tr.querySelector('input[type=\"number\"]');
+    rows.push({
+      receipt: selReceipt?.value || "",
+      paidBy: selPaid?.value || "",
+      amount: amt?.value ? Number(amt.value) : ""
+    });
+  });
+  localStorage.setItem(LS_BUDGET_ROWS, JSON.stringify(rows));
+}
+
+function recalcBudgetRemaining() {
+  let spent = 0;
+  document.querySelectorAll('#budget-table input[type="number"]').forEach(inp => {
+    const v = Number(inp.value || 0);
+    if (!isNaN(v)) spent += v;
+  });
+  const remaining = Math.max(0, BUDGET_TOTAL - spent);
+  const el = document.getElementById("budget-remaining");
+  if (el) el.textContent = `$${remaining}`;
+}
+
