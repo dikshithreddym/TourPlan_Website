@@ -359,3 +359,139 @@ async function readResponsesRemote() {
   });
   return out;
 }
+
+
+/* ===== Payments Table ===== */
+const LS_PAYMENTS_ADMIN = "payments_admin_unlocked";
+const PAYMENTS_UNLOCK_CODE = "FallTour@2025";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  // Build once at startup (if the screen exists)
+  await buildPaymentsTable?.();
+
+  // Firestore realtime updates for payments
+  const { db, fs } = window.FB || {};
+  if (db) {
+    fs.onSnapshot(fs.collection(db, "payments"), (snap) => {
+      const payments = {};
+      snap.forEach(doc => {
+        const d = doc.data() || {};
+        payments[doc.id] = { status: d.status || "Unpaid", ts: d.ts ? (d.ts.toDate ? d.ts.toDate().toISOString() : d.ts) : null };
+      });
+      updatePaymentsButtons(payments);
+    });
+  }
+});
+
+async function buildPaymentsTable() {
+  const tbody = document.querySelector("#payments-table tbody");
+  if (!tbody) return; // screen not present
+  tbody.innerHTML = "";
+
+  let payments = {};
+  try { payments = await readPaymentsRemote(); }
+  catch { payments = readPaymentsLocal(); }
+
+  // Build rows
+  PEOPLE.forEach(p => {
+    const row = document.createElement("tr");
+    row.setAttribute("data-code", p.code);
+
+    const nameTd = document.createElement("td");
+    nameTd.textContent = p.name;
+
+    const btnTd = document.createElement("td");
+    const status = payments[p.code]?.status || "Unpaid";
+    const btn = document.createElement("button");
+    btn.className = "btn " + (status === "Paid" ? "primary" : "ghost");
+    btn.textContent = status;
+    btn.dataset.paybtn = "1";
+    btn.dataset.code = p.code;
+    btn.disabled = !isPaymentsAdmin();
+
+    btn.addEventListener("click", () => {
+      if (!isPaymentsAdmin()) return;
+      const next = (btn.textContent === "Paid") ? "Unpaid" : "Paid";
+      savePaymentStatus(p.code, next, btn);
+    });
+
+    btnTd.appendChild(btn);
+    row.appendChild(nameTd);
+    row.appendChild(btnTd);
+    tbody.appendChild(row);
+  });
+
+  // Wire unlock
+  const input = document.getElementById("payments-code");
+  const unlockBtn = document.getElementById("btn-payments-unlock");
+  const feedback = document.getElementById("payments-feedback");
+  if (unlockBtn) {
+    unlockBtn.addEventListener("click", () => {
+      const code = (input?.value || "").trim();
+      if (code === PAYMENTS_UNLOCK_CODE) {
+        localStorage.setItem(LS_PAYMENTS_ADMIN, "1");
+        lockPaymentsEditing(false);
+        if (feedback) { feedback.textContent = "Editing unlocked."; feedback.className = "feedback ok"; }
+      } else {
+        localStorage.removeItem(LS_PAYMENTS_ADMIN);
+        lockPaymentsEditing(true);
+        if (feedback) { feedback.textContent = "Incorrect code."; feedback.className = "feedback err"; }
+      }
+    });
+  }
+
+  // Apply persisted state
+  lockPaymentsEditing(!isPaymentsAdmin());
+}
+
+function isPaymentsAdmin() {
+  return localStorage.getItem(LS_PAYMENTS_ADMIN) === "1";
+}
+function lockPaymentsEditing(lock = true) {
+  document.querySelectorAll('#payments-table [data-paybtn="1"]').forEach(btn => {
+    btn.disabled = !!lock;
+  });
+}
+function updatePaymentsButtons(payments) {
+  document.querySelectorAll('#payments-table [data-paybtn="1"]').forEach(btn => {
+    const code = btn.dataset.code;
+    const status = payments[code]?.status || "Unpaid";
+    btn.textContent = status;
+    btn.className = "btn " + (status === "Paid" ? "primary" : "ghost");
+  });
+}
+
+async function savePaymentStatus(code, status, btnEl) {
+  try {
+    const { db, fs } = window.FB;
+    await fs.setDoc(fs.doc(fs.collection(db, "payments"), code), {
+      status,
+      ts: fs.serverTimestamp(),
+    });
+    if (btnEl) {
+      btnEl.textContent = status;
+      btnEl.className = "btn " + (status === "Paid" ? "primary" : "ghost");
+    }
+  } catch (e) {
+    console.error("Firestore write failed:", e);
+    alert("Couldn’t save payment status. Check network/auth rules and retry.");
+  }
+}
+
+function readPaymentsLocal() {
+  try { return JSON.parse(localStorage.getItem("trip_payments") || "{}"); }
+  catch { return {}; }
+}
+async function readPaymentsRemote() {
+  const { db, fs } = window.FB;
+  const snap = await fs.getDocs(fs.collection(db, "payments"));
+  const out = {};
+  snap.forEach(doc => {
+    const data = doc.data() || {};
+    out[doc.id] = {
+      status: data.status || "Unpaid",
+      ts: data.ts ? (data.ts.toDate ? data.ts.toDate().toISOString() : data.ts) : null,
+    };
+  });
+  return out;
+}
